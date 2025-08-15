@@ -9,13 +9,13 @@ we have separate interfaces for every of the 5 main actions / services in the us
 
 Continuing with the above, the DAO / DB layer is also extracted from PancakeService into its one repository package
 with usage of interfaces (do not depend on concrete classes, but only on abstraction), so if the project later needs
-a new DAO implemnetation (in memory, relation DB), we can adhere to Open Closed Principle and just provide new implementation class
+a new DAO implementation (in memory, relational DB), we can adhere to Open Closed Principle and just provide new implementation class
 for the interface methods, without updating existing code.
 
 The Facade design pattern is used and that's what the end user / Disciple has access to. We're flexible to change / provide new PancakeService implementations,
 while adhering to Open Closed Principle.
 
-The API / Facade does not expose any domain objects (like Order, PancakeRecipe).
+The API / Facade does not expose any domain objects (like Order, PancakeRecipe / *Pancake classes).
 
 The Singleton design pattern is used for the repository implementation class PancakeOrderRepositoryImpl.
 
