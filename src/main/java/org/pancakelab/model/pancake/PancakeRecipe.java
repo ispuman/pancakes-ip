@@ -1,10 +1,13 @@
-package org.pancakelab.model.pancakes;
+package org.pancakelab.model.pancake;
 
 import java.util.EnumSet;
 
-public sealed interface PancakeRecipe permits AbstractPancake {
+public sealed interface PancakeRecipe permits AbstractPancake,
+        MeatPancake, SaltyPancake, SweetPancake, VegetarianPancake {
+
     void addIngredient(Ingredient ingredient);
     void removeIngredient(Ingredient ingredient);
+
     EnumSet<Ingredient> ingredients();
     EnumSet<Ingredient> availableIngredients();
 

@@ -1,8 +1,8 @@
 package org.pancakelab.service;
 
-import java.util.UUID;
+import org.pancakelab.model.client.PancakeShopCustomer;
 
 @FunctionalInterface
 public interface CompleteOrderService {
-    void completeOrder(UUID orderId);
+    boolean completeOrder(PancakeShopCustomer customer);
 }

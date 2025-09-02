@@ -1,9 +1,9 @@
-package org.pancakelab.model.pancakes;
+package org.pancakelab.model.pancake;
 
 import java.util.EnumSet;
 import java.util.List;
 
-public final class VegetarianPancake extends AbstractPancake {
+public final class VegetarianPancake extends AbstractPancake implements PancakeRecipe {
 
     private static final EnumSet<Ingredient> AVAILABLE_INGREDIENTS = EnumSet.complementOf(EnumSet.of(Ingredient.MEAT));
 

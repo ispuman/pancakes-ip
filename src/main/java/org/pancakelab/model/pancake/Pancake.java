@@ -1,9 +1,10 @@
-package org.pancakelab.model.pancakes;
+package org.pancakelab.model.pancake;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Pancake {
+public final class Pancake {
 
     private final PancakeRecipe pancakeRecipe;
     private final String type;
@@ -23,12 +24,39 @@ public class Pancake {
         pancakeRecipe.removeIngredient(ingredient);
     }
 
+    public void addIngredient(String ingredient) {
+        if (validateIngredient(ingredient)) {
+            pancakeRecipe.addIngredient(Ingredient.valueOf(ingredient));
+        }
+    }
+
+    public void removeIngredient(String ingredient) {
+        if (validateIngredient(ingredient)) {
+            pancakeRecipe.removeIngredient(Ingredient.valueOf(ingredient));
+        }
+    }
+
+    private boolean validateIngredient(String ingredient) {
+        Objects.requireNonNull(ingredient, "Ingredient cannot be null.");
+        if (ingredient.trim().isBlank()) {
+            throw new IllegalArgumentException("Ingredient cannot be blank.");
+        }
+        if (pancakeRecipe.availableIngredients().stream().map(Enum::toString).noneMatch(ingredient::equalsIgnoreCase)) {
+            throw new IllegalArgumentException("Ingredient cannot be of unknown or unavailable value for the pancake type.");
+        }
+        return true;
+    }
+
     public String getType() {
         return type;
     }
 
     public String description() {
         return pancakeRecipe.description();
+    }
+
+    public List<String> getIngredients() {
+        return pancakeRecipe.ingredients().stream().map(Enum::toString).toList();
     }
 
     @Override

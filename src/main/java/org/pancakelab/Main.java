@@ -1,29 +1,26 @@
 package org.pancakelab;
 
-import org.pancakelab.factory.OrderServiceFactory;
-import org.pancakelab.factory.OrderServiceFactoryImpl;
+import org.pancakelab.factory.OrderClientFactory;
+import org.pancakelab.factory.OrderClientFactoryImpl;
 import org.pancakelab.factory.PancakeFactory;
 import org.pancakelab.factory.PancakeFactoryImpl;
-import org.pancakelab.model.disciple.Disciple;
-import org.pancakelab.model.pancakes.AbstractPancake;
-import org.pancakelab.model.pancakes.Pancake;
-import org.pancakelab.model.pancakes.PancakeMenu;
-import org.pancakelab.model.pancakes.SaltyPancake;
+import org.pancakelab.model.client.Disciple;
+import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.repository.impl.PancakeOrderRepositoryImpl;
-import org.pancakelab.service.PancakeFacadeService;
+import org.pancakelab.service.PancakeClientFacade;
 
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
 
-        OrderServiceFactory orderFactory = new OrderServiceFactoryImpl();
-        final PancakeFacadeService pancakeFacadeService = orderFactory.createPancakeFacadeService();
+        OrderClientFactory orderFactory = new OrderClientFactoryImpl();
+        final PancakeClientFacade pancakeClientFacade = orderFactory.createPancakeClientFacade();
 
         final PancakeOrderRepository pancakeOrderRepository = PancakeOrderRepositoryImpl.getInstance();
 
-        Disciple disciple = new Disciple("John", 1, 1, pancakeFacadeService);
+        Disciple disciple = new Disciple("John", 1, 1);
 
         PancakeFactory pancakeFactory = new PancakeFactoryImpl();
         Pancake sap = pancakeFactory.createPancake("salty");

@@ -1,4 +1,4 @@
-package org.pancakelab.model.pancakes;
+package org.pancakelab.model.pancake;
 
 import java.util.EnumSet;
 

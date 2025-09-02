@@ -3,11 +3,13 @@ package org.pancakelab.service.impl;
 import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
 import org.pancakelab.model.order.OrderStatus;
-import org.pancakelab.model.pancakes.Pancake;
+import org.pancakelab.model.pancake.Pancake;
+import org.pancakelab.model.client.Disciple;
+import org.pancakelab.model.client.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.DeliverOrderService;
 
-import java.util.*;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,8 +24,10 @@ public class DeliverOrderServiceImpl implements DeliverOrderService {
     }
 
     @Override
-    public Map<Pancake, Integer> deliverOrder(UUID orderId) {
-        Order order = pancakeOrderRepository.removePreparedPancakeOrder(orderId);
+    public Map<Pancake, Integer> deliverOrder(PancakeShopCustomer customer) {
+        Order order = switch (customer) {
+            case Disciple disciple -> pancakeOrderRepository.removePreparedPancakeOrder(disciple);
+        };
 
         if (order != null)  {
             order.setOrderStatus(OrderStatus.SEND_FOR_DELIVERY);
@@ -31,7 +35,7 @@ public class DeliverOrderServiceImpl implements DeliverOrderService {
             logDeliverOrder(order, pancakes);
             return pancakes;
         }
-        String errorMessage = "Order %s not found and cannot be delivered.".formatted(orderId);
+        String errorMessage = "Order for %s not found and cannot be delivered.".formatted(((Disciple)customer).toString());
         logger.log(Level.SEVERE, errorMessage);
         throw new PancakeOrderNotFoundInDB(errorMessage);
     }

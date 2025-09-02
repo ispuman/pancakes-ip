@@ -1,9 +1,9 @@
-package org.pancakelab.model.pancakes;
+package org.pancakelab.model.pancake;
 
 import java.util.EnumSet;
 import java.util.List;
 
-public final class MeatPancake extends AbstractPancake {
+public final class MeatPancake extends AbstractPancake implements PancakeRecipe {
 
     private static final EnumSet<Ingredient> AVAILABLE_INGREDIENTS = EnumSet.of(
             Ingredient.MEAT, Ingredient.HAZELNUTS, Ingredient.WALNUTS,

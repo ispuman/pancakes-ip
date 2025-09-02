@@ -2,27 +2,16 @@ package org.pancakelab.factory;
 
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.repository.impl.PancakeOrderRepositoryImpl;
-import org.pancakelab.service.*;
-import org.pancakelab.service.impl.*;
+import org.pancakelab.service.DeliverOrderService;
+import org.pancakelab.service.PancakeServiceFacade;
+import org.pancakelab.service.PancakeServiceFacadeImpl;
+import org.pancakelab.service.PrepareOrderService;
+import org.pancakelab.service.impl.DeliverOrderServiceImpl;
+import org.pancakelab.service.impl.PrepareOrderServiceImpl;
 
 public class OrderServiceFactoryImpl implements OrderServiceFactory {
 
     private final PancakeOrderRepository repository = PancakeOrderRepositoryImpl.getInstance();
-
-    @Override
-    public CreateOrderService createCreateOrderService() {
-        return new CreateOrderServiceImpl(repository);
-    }
-
-    @Override
-    public CancelOrderService createCancelOrderService() {
-        return new CancelOrderServiceImpl(repository);
-    }
-
-    @Override
-    public CompleteOrderService createCompleteOrderService() {
-        return new CompleteOrderServiceImpl(repository);
-    }
 
     @Override
     public PrepareOrderService createPrepareOrderService() {
@@ -35,11 +24,7 @@ public class OrderServiceFactoryImpl implements OrderServiceFactory {
     }
 
     @Override
-    public PancakeFacadeService createPancakeFacadeService() {
-        return new PancakeFacadeServiceImpl(createCreateOrderService(),
-                                            createCancelOrderService(),
-                                            createCompleteOrderService(),
-                                            createPrepareOrderService(),
-                                            createDeliverOrderService());
+    public PancakeServiceFacade createPancakeServiceFacade() {
+        return new PancakeServiceFacadeImpl(createPrepareOrderService(), createDeliverOrderService());
     }
 }

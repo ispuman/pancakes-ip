@@ -1,8 +1,11 @@
 package org.pancakelab.service.impl;
 
+import org.pancakelab.mapper.OrderMapper;
 import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
-import org.pancakelab.model.pancakes.Pancake;
+import org.pancakelab.model.pancake.Pancake;
+import org.pancakelab.model.client.Disciple;
+import org.pancakelab.model.client.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.CreateOrderService;
 
@@ -13,21 +16,32 @@ import java.util.logging.Logger;
 public class CreateOrderServiceImpl implements CreateOrderService {
 
     private final PancakeOrderRepository pancakeOrderRepository;
+    private final OrderMapper orderMapper;
 
     private static final Logger logger = Logger.getLogger(CreateOrderServiceImpl.class.getName());
 
     private Order order;
 
-    public CreateOrderServiceImpl(PancakeOrderRepository pancakeOrderRepository) {
+    public CreateOrderServiceImpl(PancakeOrderRepository pancakeOrderRepository, OrderMapper orderMapper) {
         this.pancakeOrderRepository = pancakeOrderRepository;
+        this.orderMapper = orderMapper;
     }
 
     @Override
-    public UUID createOrder(int building, int room) {
-        order = new Order(building, room);
-        pancakeOrderRepository.savePendingPancakeOrder(order.getId(), order);
+    public Order createOrder(int building, int room, PancakeShopCustomer customer) {
+        switch (customer) {
+            case Disciple disciple -> {
+                Order previousOrder = pancakeOrderRepository.getDiscipleOrder(disciple);
+                if (previousOrder == null) {
+                    order = new Order(building, room, customer, orderMapper);
+                    pancakeOrderRepository.savePendingPancakeOrder(order, disciple);
+                } else {
+                    throw newPancakeOrderCannotBeCreatedYet(previousOrder.getId());
+                }
+            }
+        }
         logCreateOrder(order);
-        return order.getId();
+        return order;
     }
 
     @Override
@@ -37,7 +51,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     }
 
     @Override
-    public void removePancakes(Pancake pancake) {
+    public void removePancake(Pancake pancake) {
         if (order.getPancakeItems().containsKey(pancake)) {
             order.removePancake(pancake);
             logAddRemovePancake(order, pancake, "Removed");
@@ -49,6 +63,13 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
         logger.log(Level.INFO, "Order %s for building %d, room %d is created."
                 .formatted(order.getId(), address.buildingNumber(), address.roomNumber()));
+    }
+
+    private NewPancakeOrderCannotBeCreatedYet newPancakeOrderCannotBeCreatedYet(UUID orderId) {
+        String errorMessage =
+                "New pancake order cannot be created until existing one %s is cancelled or delivered.".formatted(orderId);
+        logger.log(Level.SEVERE, errorMessage);
+        return new NewPancakeOrderCannotBeCreatedYet(errorMessage);
     }
 
     private void logAddRemovePancake(Order order, Pancake pancake, String action) {

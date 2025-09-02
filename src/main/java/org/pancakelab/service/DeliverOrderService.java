@@ -1,12 +1,12 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.pancakes.Pancake;
+import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.pancake.Pancake;
 
 import java.util.Map;
-import java.util.UUID;
 
 @FunctionalInterface
 public interface DeliverOrderService {
 
-    Map<Pancake, Integer> deliverOrder(UUID orderId);
+    Map<Pancake, Integer> deliverOrder(PancakeShopCustomer customer);
 }

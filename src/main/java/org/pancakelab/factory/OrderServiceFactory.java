@@ -1,13 +1,13 @@
 package org.pancakelab.factory;
 
-import org.pancakelab.service.*;
+import org.pancakelab.service.DeliverOrderService;
+import org.pancakelab.service.PancakeServiceFacade;
+import org.pancakelab.service.PrepareOrderService;
 
 public interface OrderServiceFactory {
-    CreateOrderService createCreateOrderService();
-    CancelOrderService createCancelOrderService();
-    CompleteOrderService createCompleteOrderService();
+
     PrepareOrderService createPrepareOrderService();
     DeliverOrderService createDeliverOrderService();
 
-    PancakeFacadeService createPancakeFacadeService();
+    PancakeServiceFacade createPancakeServiceFacade();
 }

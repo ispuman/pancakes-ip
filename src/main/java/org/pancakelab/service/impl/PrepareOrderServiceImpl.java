@@ -3,9 +3,12 @@ package org.pancakelab.service.impl;
 import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
 import org.pancakelab.model.order.OrderStatus;
+import org.pancakelab.model.client.Disciple;
+import org.pancakelab.model.client.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.PrepareOrderService;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -22,18 +25,15 @@ public class PrepareOrderServiceImpl implements PrepareOrderService {
     }
 
     @Override
-    public void prepareOrder(UUID orderId) {
-        Order order = pancakeOrderRepository.removeCompletedPancakeOrder(orderId);
+    public void prepareOrder(PancakeShopCustomer customer) {
+        Order order = switch (customer) {
+            case Disciple disciple -> pancakeOrderRepository.removeCompletedPancakeOrder(disciple);
+        };
+        Objects.requireNonNull(order, "The Chef cannot prepare order that doesn't exist.");
 
-        if (order != null) {
-            order.setOrderStatus(OrderStatus.PREPARED);
-            pancakeOrderRepository.savePreparedPancakeOrder(orderId, order);
-            logPrepareOrder(order);
-        } else {
-            String errorMessage = "Order %s not found and cannot be prepared by Chef.".formatted(orderId);
-            logger.log(Level.SEVERE, errorMessage);
-            throw new PancakeOrderNotFoundInDB(errorMessage);
-        }
+        order.setOrderStatus(OrderStatus.PREPARED);
+        pancakeOrderRepository.savePreparedPancakeOrder(order.getId(), order);
+        logPrepareOrder(order);
 
     }
 

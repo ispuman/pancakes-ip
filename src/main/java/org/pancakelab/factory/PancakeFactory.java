@@ -1,6 +1,6 @@
 package org.pancakelab.factory;
 
-import org.pancakelab.model.pancakes.Pancake;
+import org.pancakelab.model.pancake.Pancake;
 
 import java.util.List;
 

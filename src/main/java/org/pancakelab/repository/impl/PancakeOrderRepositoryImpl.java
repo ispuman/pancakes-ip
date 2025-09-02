@@ -1,18 +1,22 @@
 package org.pancakelab.repository.impl;
 
 import org.pancakelab.model.order.Order;
+import org.pancakelab.model.client.Disciple;
+import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.repository.PancakeOrderRepository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PancakeOrderRepositoryImpl implements PancakeOrderRepository {
+public final class PancakeOrderRepositoryImpl implements PancakeOrderRepository {
 
     private final Map<UUID, Order> pendingPancakeOrders = new ConcurrentHashMap<>();
     private final Map<UUID, Order> completedPancakeOrders = new ConcurrentHashMap<>();
     private final Map<UUID, Order> preparedPancakeOrders = new ConcurrentHashMap<>();
+    private final Map<Disciple, Order> discipleOrders = new ConcurrentHashMap<>();
 
     private PancakeOrderRepositoryImpl() {}
 
@@ -20,22 +24,33 @@ public class PancakeOrderRepositoryImpl implements PancakeOrderRepository {
         private static final PancakeOrderRepositoryImpl INSTANCE = new PancakeOrderRepositoryImpl();
     }
 
-    public static PancakeOrderRepositoryImpl getInstance() {
+    public static PancakeOrderRepository getInstance() {
         return BillPughSingletonHelper.INSTANCE;
     }
 
-    protected Object readResolve() {
+    private Object readResolve() {
         return getInstance();
     }
 
     @Override
-    public void savePendingPancakeOrder(UUID orderId, Order order) {
-        pendingPancakeOrders.put(orderId, order);
+    public void savePendingPancakeOrder(Order order, Disciple customer) {
+        pendingPancakeOrders.put(order.getId(), order);
+        discipleOrders.put(customer, order);
     }
 
     @Override
-    public Order removePendingPancakeOrder(UUID orderId) {
-        return pendingPancakeOrders.remove(orderId);
+    public Order removePendingPancakeOrder(Disciple customer) {
+        UUID orderId = discipleOrders.get(customer).getId();
+        Order order = pendingPancakeOrders.remove(orderId);
+        if (!OrderStatus.COMPLETED.equals(order.getStatus())) {
+            discipleOrders.remove(customer);
+        }
+        return order;
+    }
+
+    @Override
+    public Order getPendingPancakeOrder(UUID orderId) {
+        return pendingPancakeOrders.get(orderId);
     }
 
     @Override
@@ -49,7 +64,8 @@ public class PancakeOrderRepositoryImpl implements PancakeOrderRepository {
     }
 
     @Override
-    public Order removeCompletedPancakeOrder(UUID orderId) {
+    public Order removeCompletedPancakeOrder(Disciple customer) {
+        UUID orderId = discipleOrders.get(customer).getId();
         return completedPancakeOrders.remove(orderId);
     }
 
@@ -64,7 +80,24 @@ public class PancakeOrderRepositoryImpl implements PancakeOrderRepository {
     }
 
     @Override
-    public Order removePreparedPancakeOrder(UUID orderId) {
+    public Order removePreparedPancakeOrder(Disciple customer) {
+        UUID orderId = discipleOrders.get(customer).getId();
+        discipleOrders.remove(customer);
         return preparedPancakeOrders.remove(orderId);
+    }
+
+    @Override
+    public Order getDiscipleOrder(Disciple customer) {
+        return discipleOrders.get(customer);
+    }
+
+    @Override
+    public List<Order> listAllOrders() {
+        return discipleOrders.values().stream().toList();
+    }
+
+    @Override
+    public Order removeCustomerOrder(Disciple customer) {
+        return discipleOrders.remove(customer);
     }
 }
