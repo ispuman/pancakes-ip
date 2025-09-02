@@ -9,7 +9,7 @@ we have separate interfaces for every of the 5 main actions / services in the us
 
 Continuing with the above, the DAO / DB layer is also extracted from PancakeService into its one repository package
 with usage of interfaces (do not depend on concrete classes, but only on abstraction), so if the project later needs
-a new DAO implemnetation (in memory, relational DB), we can adhere to Open Closed Principle and just provide new implementation class
+a new DAO implementation (in memory, relational DB), we can adhere to Open Closed Principle and just provide new implementation class
 for the interface methods, without updating existing code.
 
 The Facade design pattern is used, and that's what the end user / Disciple has access to. We're flexible to change / provide new PancakeService implementations,
@@ -27,7 +27,7 @@ While the compound operation is not guarded by a Lock or synchronised, there is 
 as the UUID of every Order is unique ID and such operation can be executed only by one thread / Disciple.
 As every disciple (thread) with every new request, creates unique ID for the ConcurrentHashMap key.
 
-The logging is updated from StringBuillder to use Logger class from the JDK API.
+The logging is updated from StringBuilder to use Logger class from the JDK API.
 
 Object Factory is used for adhering to Dependency Inversion Principle and they are used only in the Main() method
 of the application, to initialize all the services, etc. 
