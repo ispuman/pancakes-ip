@@ -4,7 +4,7 @@ import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
 import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.model.client.Disciple;
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.CancelOrderService;
 
@@ -25,24 +25,22 @@ public class CancelOrderServiceImpl implements CancelOrderService {
 
     @Override
     public boolean cancelOrder(PancakeShopCustomer customer) {
-        Objects.requireNonNull(customer, "Customer cannot be null");
-        Order order = switch (customer) {
-            case Disciple disciple -> pancakeOrderRepository.getDiscipleOrder(disciple);
-        };
-        Objects.requireNonNull(order, "Order that doesn't exist cannot be cancelled.");
-        UUID orderId = order.getId();
+        if (customer instanceof Disciple disciple) {
+            Order order = pancakeOrderRepository.getDiscipleOrder(disciple);
+            Objects.requireNonNull(order, "%s Order for cancellation cannot be found.".formatted(disciple.toString()));
+            UUID orderId = order.getId();
 
-        if (isActionAuthorized(orderId, customer)) {
-            switch (customer) {
-                case Disciple disciple -> pancakeOrderRepository.removePendingPancakeOrder(disciple);
+            if (isActionAuthorized(orderId, customer)) {
+                pancakeOrderRepository.removePendingPancakeOrder(disciple);
+                order.setOrderStatus(OrderStatus.CANCELLED);
+                logCancelOrder(order);
+                return true;
+            } else {
+                logger.log(Level.SEVERE, " Unauthorized cancellation attempt of Order %s by %s.".formatted(orderId, disciple.toString()));
+                return false;
             }
-            order.setOrderStatus(OrderStatus.CANCELLED);
-            logCancelOrder(order);
-            return true;
         } else {
-            logger.log(Level.SEVERE, " Unauthorized cancellation attempt of Order %s by %s."
-                    .formatted(orderId, ((Disciple)customer).toString()));
-            return false;
+            throw new IllegalArgumentException("Customer type not supported.");
         }
     }
 

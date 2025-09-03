@@ -5,7 +5,7 @@ import org.pancakelab.model.order.Order;
 import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.model.client.Disciple;
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.CompleteOrderService;
 
@@ -28,24 +28,23 @@ public class CompleteOrderServiceImpl implements CompleteOrderService {
 
     @Override
     public boolean completeOrder(PancakeShopCustomer customer) {
-        Objects.requireNonNull(customer, "Customer cannot be null");
-        Order order = switch (customer) {
-            case Disciple disciple -> pancakeOrderRepository.getDiscipleOrder(disciple);
-        };
-        UUID orderId = order.getId();
+        if (customer instanceof Disciple disciple) {
+            Order order = pancakeOrderRepository.getDiscipleOrder(disciple);
+            Objects.requireNonNull(order, "%s order for completion cannot be found.".formatted(disciple.toString()));
+            UUID orderId = order.getId();
 
-        if (isActionAuthorized(orderId, customer)) {
-            order.setOrderStatus(OrderStatus.COMPLETED);
-            pancakeOrderRepository.saveCompletedPancakeOrder(orderId, order);
-            logCompleteOrder(order, order.getPancakeItems());
-            switch (customer) {
-                case Disciple disciple -> pancakeOrderRepository.removePendingPancakeOrder(disciple);
+            if (isActionAuthorized(orderId, disciple)) {
+                order.setOrderStatus(OrderStatus.COMPLETED);
+                pancakeOrderRepository.saveCompletedPancakeOrder(orderId, order);
+                logCompleteOrder(order, order.getPancakeItems());
+                pancakeOrderRepository.removePendingPancakeOrder(disciple);
+                return true;
+            } else {
+                logger.log(Level.SEVERE, " Unauthorized completion attempt of Order %s by %s.".formatted(orderId, disciple.toString()));
+                return false;
             }
-            return true;
         } else {
-            logger.log(Level.SEVERE, " Unauthorized completion attempt of Order %s by %s."
-                    .formatted(orderId, ((Disciple)customer).toString()));
-            return false;
+            throw new IllegalArgumentException("Customer type not supported.");
         }
     }
 

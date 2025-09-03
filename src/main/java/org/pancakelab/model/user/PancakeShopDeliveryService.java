@@ -5,7 +5,6 @@ import org.pancakelab.factory.OrderServiceFactoryImpl;
 import org.pancakelab.factory.PancakeFactoryImpl;
 import org.pancakelab.mapper.OrderMapper;
 import org.pancakelab.mapper.PancakeMapper;
-import org.pancakelab.model.client.PancakeShopCustomer;
 import org.pancakelab.service.PancakeServiceFacade;
 
 import java.util.Map;

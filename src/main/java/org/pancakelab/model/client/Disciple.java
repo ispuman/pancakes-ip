@@ -4,6 +4,7 @@ import org.pancakelab.dto.OrderDTO;
 import org.pancakelab.dto.PancakeDTO;
 import org.pancakelab.factory.OrderClientFactoryImpl;
 import org.pancakelab.model.order.DeliveryAddress;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.service.PancakeClientFacade;
 
 import java.util.Objects;

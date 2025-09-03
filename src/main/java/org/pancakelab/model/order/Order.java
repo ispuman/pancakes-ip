@@ -4,7 +4,7 @@ import org.pancakelab.dto.OrderDTO;
 import org.pancakelab.mapper.OrderMapper;
 import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.model.client.Disciple;
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 
 import java.util.*;
 

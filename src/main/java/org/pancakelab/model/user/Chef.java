@@ -1,7 +1,6 @@
 package org.pancakelab.model.user;
 
 import org.pancakelab.factory.OrderServiceFactoryImpl;
-import org.pancakelab.model.client.PancakeShopCustomer;
 import org.pancakelab.service.PancakeServiceFacade;
 
 import java.util.UUID;

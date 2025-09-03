@@ -4,7 +4,7 @@ import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
 import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.model.client.Disciple;
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.PrepareOrderService;
 
@@ -26,15 +26,16 @@ public class PrepareOrderServiceImpl implements PrepareOrderService {
 
     @Override
     public void prepareOrder(PancakeShopCustomer customer) {
-        Order order = switch (customer) {
-            case Disciple disciple -> pancakeOrderRepository.removeCompletedPancakeOrder(disciple);
-        };
-        Objects.requireNonNull(order, "The Chef cannot prepare order that doesn't exist.");
+        if (customer instanceof Disciple disciple) {
+            Order order = pancakeOrderRepository.removeCompletedPancakeOrder(disciple);
+            Objects.requireNonNull(order, "The Chef cannot prepare order that doesn't exist.");
 
-        order.setOrderStatus(OrderStatus.PREPARED);
-        pancakeOrderRepository.savePreparedPancakeOrder(order.getId(), order);
-        logPrepareOrder(order);
-
+            order.setOrderStatus(OrderStatus.PREPARED);
+            pancakeOrderRepository.savePreparedPancakeOrder(order.getId(), order);
+            logPrepareOrder(order);
+        } else {
+            throw new IllegalArgumentException("Customer type not supported.");
+        }
     }
 
     public Set<UUID> listPreparedOrders() {

@@ -5,7 +5,7 @@ import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
 import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.model.client.Disciple;
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.CreateOrderService;
 
@@ -29,19 +29,19 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
     @Override
     public Order createOrder(int building, int room, PancakeShopCustomer customer) {
-        switch (customer) {
-            case Disciple disciple -> {
-                Order previousOrder = pancakeOrderRepository.getDiscipleOrder(disciple);
-                if (previousOrder == null) {
-                    order = new Order(building, room, customer, orderMapper);
-                    pancakeOrderRepository.savePendingPancakeOrder(order, disciple);
-                } else {
-                    throw newPancakeOrderCannotBeCreatedYet(previousOrder.getId());
-                }
+        if (customer instanceof Disciple disciple) {
+            Order previousOrder = pancakeOrderRepository.getDiscipleOrder(disciple);
+            if (previousOrder == null) {
+                order = new Order(building, room, customer, orderMapper);
+                pancakeOrderRepository.savePendingPancakeOrder(order, disciple);
+                logCreateOrder(order);
+                return order;
+            } else {
+                throw newPancakeOrderCannotBeCreatedYet(previousOrder.getId());
             }
+        } else {
+            throw new IllegalArgumentException("Customer type not supported.");
         }
-        logCreateOrder(order);
-        return order;
     }
 
     @Override

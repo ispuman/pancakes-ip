@@ -1,6 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.model.pancake.Pancake;
 
 import java.util.Map;

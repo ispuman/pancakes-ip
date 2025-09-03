@@ -1,9 +1,9 @@
-package org.pancakelab.model.client;
+package org.pancakelab.model.user;
 
 import org.pancakelab.dto.OrderDTO;
 import org.pancakelab.dto.PancakeDTO;
 
-public sealed interface PancakeShopCustomer permits Disciple {
+public interface PancakeShopCustomer {
     OrderDTO createOrder(int buildingNumber, int roomNumber);
     boolean cancelOrder();
     boolean completeOrder();

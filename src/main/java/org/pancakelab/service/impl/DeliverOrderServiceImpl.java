@@ -5,7 +5,7 @@ import org.pancakelab.model.order.Order;
 import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.model.client.Disciple;
-import org.pancakelab.model.client.PancakeShopCustomer;
+import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.DeliverOrderService;
 
@@ -25,19 +25,20 @@ public class DeliverOrderServiceImpl implements DeliverOrderService {
 
     @Override
     public Map<Pancake, Integer> deliverOrder(PancakeShopCustomer customer) {
-        Order order = switch (customer) {
-            case Disciple disciple -> pancakeOrderRepository.removePreparedPancakeOrder(disciple);
-        };
-
-        if (order != null)  {
-            order.setOrderStatus(OrderStatus.SEND_FOR_DELIVERY);
-            var pancakes = order.getPancakeItems();
-            logDeliverOrder(order, pancakes);
-            return pancakes;
+        if (customer instanceof Disciple disciple) {
+            Order order = pancakeOrderRepository.removePreparedPancakeOrder(disciple);
+            if (order != null)  {
+                order.setOrderStatus(OrderStatus.SEND_FOR_DELIVERY);
+                var pancakes = order.getPancakeItems();
+                logDeliverOrder(order, pancakes);
+                return pancakes;
+            }
+            String errorMessage = "Order for %s not found and cannot be delivered.".formatted(disciple.toString());
+            logger.log(Level.SEVERE, errorMessage);
+            throw new PancakeOrderNotFoundInDB(errorMessage);
+        } else {
+            throw new IllegalArgumentException("Customer type not supported.");
         }
-        String errorMessage = "Order for %s not found and cannot be delivered.".formatted(((Disciple)customer).toString());
-        logger.log(Level.SEVERE, errorMessage);
-        throw new PancakeOrderNotFoundInDB(errorMessage);
     }
 
     private void logDeliverOrder(Order order, Map<Pancake, Integer> pancakes) {
