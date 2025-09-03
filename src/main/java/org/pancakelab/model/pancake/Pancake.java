@@ -1,6 +1,5 @@
 package org.pancakelab.model.pancake;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,6 +9,8 @@ public final class Pancake {
     private final String type;
 
     private static final String POSTFIX = "Pancake";
+    public static final String UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE =
+            "Ingredient cannot be of unavailable value for the pancake type.";
 
     public Pancake(PancakeRecipe recipe) {
         this.pancakeRecipe = recipe;
@@ -17,7 +18,13 @@ public final class Pancake {
     }
 
     public void addIngredient(Ingredient ingredient) {
-        pancakeRecipe.addIngredient(ingredient);
+        if (pancakeRecipe.availableIngredients().contains(ingredient)) {
+            if (!pancakeRecipe.ingredients().contains(ingredient)) {
+                pancakeRecipe.addIngredient(ingredient);
+            }
+        } else {
+            throw new IllegalArgumentException(UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE);
+        }
     }
 
     public void removeIngredient(Ingredient ingredient) {
@@ -26,13 +33,13 @@ public final class Pancake {
 
     public void addIngredient(String ingredient) {
         if (validateIngredient(ingredient)) {
-            pancakeRecipe.addIngredient(Ingredient.valueOf(ingredient));
+            pancakeRecipe.addIngredient(Ingredient.valueOf(ingredient.toUpperCase()));
         }
     }
 
     public void removeIngredient(String ingredient) {
         if (validateIngredient(ingredient)) {
-            pancakeRecipe.removeIngredient(Ingredient.valueOf(ingredient));
+            pancakeRecipe.removeIngredient(Ingredient.valueOf(ingredient.toUpperCase()));
         }
     }
 
@@ -41,8 +48,8 @@ public final class Pancake {
         if (ingredient.trim().isBlank()) {
             throw new IllegalArgumentException("Ingredient cannot be blank.");
         }
-        if (pancakeRecipe.availableIngredients().stream().map(Enum::toString).noneMatch(ingredient::equalsIgnoreCase)) {
-            throw new IllegalArgumentException("Ingredient cannot be of unknown or unavailable value for the pancake type.");
+        if (!pancakeRecipe.availableIngredients().contains(Ingredient.valueOf(ingredient.toUpperCase()))) {
+            throw new IllegalArgumentException(UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE);
         }
         return true;
     }

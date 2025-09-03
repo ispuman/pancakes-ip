@@ -21,8 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CompleteOrderServiceImplTest {
@@ -36,7 +35,6 @@ public class CompleteOrderServiceImplTest {
     private final PancakeMapper pancakeMapper = new PancakeMapper(pancakeFactory);
 
     @Test
-    @org.junit.jupiter.api.Order(20)
     public void GivenOrderExists_WhenAddingPancakes_ThenCorrectNumberOfPancakesAdded_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);
@@ -63,7 +61,6 @@ public class CompleteOrderServiceImplTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(40)
     public void GivenOrderExists_WhenCompletingOrder_ThenOrderCompleted_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);

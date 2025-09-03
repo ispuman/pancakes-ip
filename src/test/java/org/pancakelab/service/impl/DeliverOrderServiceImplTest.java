@@ -37,7 +37,6 @@ public class DeliverOrderServiceImplTest {
     private final PancakeMapper pancakeMapper = new PancakeMapper(pancakeFactory);
 
     @Test
-    @org.junit.jupiter.api.Order(60)
     public void GivenOrderExists_WhenDeliveringOrder_ThenCorrectOrderReturnedAndOrderRemovedFromTheDatabase_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);

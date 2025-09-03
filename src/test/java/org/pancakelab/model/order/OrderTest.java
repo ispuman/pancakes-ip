@@ -3,6 +3,7 @@ package org.pancakelab.model.order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.pancakelab.dto.OrderDTO;
+import org.pancakelab.dto.PancakeDTO;
 import org.pancakelab.factory.PancakeFactory;
 import org.pancakelab.factory.PancakeFactoryImpl;
 import org.pancakelab.mapper.PancakeMapper;
@@ -12,6 +13,8 @@ import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.repository.impl.PancakeOrderRepositoryImpl;
 import org.pancakelab.service.impl.PancakeOrderNotFoundInDB;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +27,6 @@ public class OrderTest {
     private final PancakeMapper pancakeMapper = new PancakeMapper(pancakeFactory);
 
     @Test
-    @org.junit.jupiter.api.Order(90)
     public void GivenOrderExists_WhenCompletingOrder_ThenOrderCannotBeCancelled_Test() {
         // setup
         Disciple disciple = new Disciple("Louise", 4, 2);
@@ -39,6 +41,28 @@ public class OrderTest {
         // verify
         assertTrue(exception.getMessage().contains("not found and cannot be cancelled."));
         // tear down
+        pancakeOrderRepository.removeCompletedPancakeOrder(disciple);
+        pancakeOrderRepository.removeCustomerOrder(disciple);
+    }
+
+    @Test
+    public void GivenDiscipleCreatesAnOrder_WhenSheRemovesAllAddedPancakes_ThenCompletionFails_Test() {
+        // setup
+        Disciple disciple = new Disciple("Elizabeth", 5, 7);
+        disciple.createOrder(5, 7);
+        PancakeDTO pancake = new PancakeDTO("sweet", List.of("milk_chocolate", "chocolate_chip"));
+        disciple.addPancake(pancake);
+        // exercise
+        disciple.removePancake(pancake);
+        boolean completion = disciple.completeOrder();
+        // verify
+        assertFalse(completion);
+        assertEquals(OrderStatus.REMOVING_PANECAKES, pancakeOrderRepository.getDiscipleOrder(disciple).getStatus());
+        assertTrue(pancakeOrderRepository.listCompletedOrders().isEmpty());
+        assertEquals(1, pancakeOrderRepository.listAllOrders().size());
+        // tear down
+        pancakeOrderRepository.removePendingPancakeOrder(disciple);
+        pancakeOrderRepository.removeCustomerOrder(disciple);
     }
 
     private OrderDTO addPancakes(Disciple customer) {

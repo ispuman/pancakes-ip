@@ -34,7 +34,6 @@ public class PrepareOrderServiceImplTest {
     private final PancakeMapper pancakeMapper = new PancakeMapper(pancakeFactory);
 
     @Test
-    @org.junit.jupiter.api.Order(50)
     public void GivenOrderExists_WhenPreparingOrder_ThenOrderPrepared_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);

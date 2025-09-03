@@ -12,7 +12,6 @@ import static org.pancakelab.model.order.DeliveryAddress.*;
 public class DeliveryAddressTest {
 
     @Test
-    @org.junit.jupiter.api.Order(4)
     public void GivenNonPositiveAddress_WhenCreatingNewOrder_TheAppropriateErrorMessageIsDisplayed() {
 
         Disciple disciple = new Disciple("John", 1, 1);
@@ -23,7 +22,6 @@ public class DeliveryAddressTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(5)
     public void GivenNonExistingRoomAddress_WhenCreatingNewOrder_TheAppropriateErrorMessageIsDisplayed() {
 
         Disciple disciple = new Disciple("John", 1, 1);
@@ -34,7 +32,6 @@ public class DeliveryAddressTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(6)
     public void GivenNonExistingBuildingAddress_WhenCreatingNewOrder_TheAppropriateErrorMessageIsDisplayed() {
 
         Disciple disciple = new Disciple("John", 1, 1);

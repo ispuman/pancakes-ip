@@ -33,7 +33,6 @@ public class DiscipleTest {
     private final PancakeOrderRepository pancakeOrderRepository = PancakeOrderRepositoryImpl.getInstance();
 
     @Test
-    @org.junit.jupiter.api.Order(10)
     public void GivenOrderDoesNotExist_WhenCreatingOrder_ThenOrderCreatedWithCorrectData_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);
@@ -51,7 +50,6 @@ public class DiscipleTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(30)
     public void GivenPancakesExists_WhenRemovingPancakes_ThenCorrectNumberOfPancakesRemoved_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);
@@ -89,7 +87,6 @@ public class DiscipleTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(70)
     public void GivenOrderExists_WhenCancellingOrder_ThenOrderAndPancakesRemoved_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);
@@ -113,7 +110,6 @@ public class DiscipleTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(80)
     public void GivenOrderExists_WhenCompletingSecondOrder_ThenSumOfCompletedOrdersMustBeCorrect_Test() {
         // setup
         Disciple disciple = new Disciple("John", 1, 1);
@@ -140,7 +136,6 @@ public class DiscipleTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(100)
     public void GivenOrderExists_NewOrderCannotBeCreated_UntilExistingOneIsCancelledOrDelivered_Test() {
         // setup
         Disciple disciple = new Disciple("Tom", 2, 5);
@@ -155,6 +150,9 @@ public class DiscipleTest {
 
         // verify
         assertTrue(exception.getMessage().contains("New pancake order cannot be created until existing one"));
+        // tear down
+        pancakeOrderRepository.removeCompletedPancakeOrder(disciple);
+        pancakeOrderRepository.removeCustomerOrder(disciple);
     }
 
     private OrderDTO addPancakes(Disciple customer) {

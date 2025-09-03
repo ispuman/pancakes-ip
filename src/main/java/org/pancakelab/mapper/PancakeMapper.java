@@ -31,7 +31,7 @@ public class PancakeMapper implements Mapper<Pancake, PancakeDTO> {
 
         Pancake pancake = pancakeFactory.createPancake(source.category());
         for (String ingredient : source.ingredients()) {
-            pancake.addIngredient(Ingredient.valueOf(ingredient));
+            pancake.addIngredient(Ingredient.valueOf(ingredient.toUpperCase()));
         }
         return pancake;
     }
