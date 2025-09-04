@@ -1,6 +1,8 @@
 package org.pancakelab.model.pancake;
 
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 
 public enum Ingredient {
     DARK_CHOCOLATE,
@@ -19,7 +21,8 @@ public enum Ingredient {
     BLUEBERRIES,
     MEAT;
 
-    public static final Ingredient[] VALUES = Ingredient.values();
+    public static final List<String> VALUES = Arrays.stream(Ingredient.values())
+            .map(Enum::toString).map(String::toLowerCase).toList();
 
     public EnumSet<Ingredient> getAllIngredients() {
         return EnumSet.allOf(Ingredient.class);

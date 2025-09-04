@@ -7,10 +7,23 @@ import org.pancakelab.factory.PancakeFactoryImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.pancakelab.model.pancake.Pancake.PANCAKE_INGREDIENT_TYPO;
 import static org.pancakelab.model.pancake.Pancake.UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PancakeTest {
+
+    @Test
+    public void GivenOrderingPancake_WhenAddingInvalidIngredient_TheAppropriateErrorMessageIsDisplayed() {
+        // setup
+        Pancake pancake = new Pancake(new SaltyPancake());
+        pancake.addIngredient("cheese");
+        // exercise
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pancake.addIngredient("hazelnut"));
+        // verify
+        assertEquals(PANCAKE_INGREDIENT_TYPO.formatted(Ingredient.VALUES), ex.getMessage());
+        // verify
+    }
 
     @Test
     public void GivenOrderingPancake_WhenAddingValidButUnsupportedIngredient_TheAppropriateErrorMessageIsDisplayed() {
@@ -21,7 +34,8 @@ public class PancakeTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> pancake.addIngredient(Ingredient.MEAT));
         // verify
-        assertEquals(UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE, exception.getMessage() );
+        assertEquals(UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE.formatted(pancake.getAvailableIngredients(), pancake.getType()),
+                exception.getMessage());
         // tear down
     }
 
@@ -29,12 +43,13 @@ public class PancakeTest {
     public void GivenOrderingPancake_WhenAddingValidButUnsupportedIngredientAsString_TheAppropriateErrorMessageIsDisplayed() {
         // setup
         PancakeFactory pancakeFactory = new PancakeFactoryImpl();
-        Pancake pancake = pancakeFactory.createPancake("vegetarian");
-        pancake.addIngredient("bananas");
+        Pancake pancake = pancakeFactory.createPancake("sweet");
+        pancake.addIngredient("honey");
         // exercise
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pancake.addIngredient("meat"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pancake.addIngredient("cheese"));
         // verify
-        assertEquals(UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE, ex.getMessage() );
+        assertEquals(UNAVAILABLE_INGREDIENT_FOR_PANCAKE_TYPE.formatted(pancake.getAvailableIngredients(), pancake.getType()),
+                ex.getMessage());
         // tear down
     }
 }
