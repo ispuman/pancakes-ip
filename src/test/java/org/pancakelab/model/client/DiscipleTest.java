@@ -8,6 +8,7 @@ import org.pancakelab.factory.PancakeFactory;
 import org.pancakelab.factory.PancakeFactoryImpl;
 import org.pancakelab.mapper.PancakeMapper;
 import org.pancakelab.model.order.Order;
+import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.model.pancake.Ingredient;
 import org.pancakelab.model.pancake.MeatPancake;
 import org.pancakelab.model.pancake.Pancake;
@@ -16,9 +17,8 @@ import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.repository.impl.PancakeOrderRepositoryImpl;
 import org.pancakelab.service.impl.NewPancakeOrderCannotBeCreatedYet;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,6 +31,8 @@ public class DiscipleTest {
     private final PancakeMapper pancakeMapper = new PancakeMapper(pancakeFactory);
 
     private final PancakeOrderRepository pancakeOrderRepository = PancakeOrderRepositoryImpl.getInstance();
+
+    private static final Logger logger = Logger.getLogger(DiscipleTest.class.getName());
 
     @Test
     public void GivenOrderDoesNotExist_WhenCreatingOrder_ThenOrderCreatedWithCorrectData_Test() {
@@ -47,6 +49,32 @@ public class DiscipleTest {
         // tear down
         boolean result = disciple.cancelOrder();
         assertTrue(result);
+    }
+
+    @Test
+    public void GivenOrderIsCreated_WhenAnotherDiscipleCreatesOrderAndAddsPancakes_ThenFirstDisciplePancakesAreStillZero_Test() {
+        // setup
+        Disciple disciple1 = new Disciple("Elena", 3, 2);
+        Disciple disciple2 = new Disciple("Maria", 5, 4);
+
+        OrderDTO order1 = disciple1.createOrder(3, 2);
+        OrderDTO order2 = disciple2.createOrder(5, 4);
+        disciple2.addPancake(new PancakeDTO("salty",List.of("cheese", "walnuts")));
+        disciple2.addPancake(new PancakeDTO("sweet",List.of("honey", "bananas")));
+
+        assertEquals(0, pancakeOrderRepository.getDiscipleOrder(disciple1).getPancakeItems().values().stream()
+                .mapToInt(Integer::intValue).sum());
+        assertEquals(OrderStatus.ADDING_PANECAKES, pancakeOrderRepository.getDiscipleOrder(disciple2).getStatus());
+        // exercise
+        disciple1.addPancake(new PancakeDTO("salty",List.of("yellow_cheese", "hazelnuts")));
+        // verify
+        assertEquals(2, pancakeOrderRepository.getDiscipleOrder(disciple2).getPancakeItems().values().stream()
+                .mapToInt(Integer::intValue).sum());
+        assertEquals(1, pancakeOrderRepository.getDiscipleOrder(disciple1).getPancakeItems().values().stream()
+                .mapToInt(Integer::intValue).sum());
+        // tear down
+       disciple1.cancelOrder();
+       disciple2.cancelOrder();
     }
 
     @Test

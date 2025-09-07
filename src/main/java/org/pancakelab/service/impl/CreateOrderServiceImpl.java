@@ -3,12 +3,14 @@ package org.pancakelab.service.impl;
 import org.pancakelab.mapper.OrderMapper;
 import org.pancakelab.model.order.DeliveryAddress;
 import org.pancakelab.model.order.Order;
+import org.pancakelab.model.order.OrderStatus;
 import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.model.client.Disciple;
 import org.pancakelab.model.user.PancakeShopCustomer;
 import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.CreateOrderService;
 
+import java.util.EnumSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +21,8 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     private final OrderMapper orderMapper;
 
     private static final Logger logger = Logger.getLogger(CreateOrderServiceImpl.class.getName());
+    private final EnumSet<OrderStatus> canUpdatePancakesStates = EnumSet.of(OrderStatus.PENDING,
+            OrderStatus.ADDING_PANECAKES, OrderStatus.REMOVING_PANECAKES);
 
     private Order order;
 
@@ -46,13 +50,15 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
     @Override
     public void addPancake(Pancake pancake) {
-        order.addPancake(pancake);
-        logAddRemovePancake(order, pancake, "Added");
+        if (canUpdatePancakesStates.contains(order.getStatus())) {
+            order.addPancake(pancake);
+            logAddRemovePancake(order, pancake, "Added");
+        }
     }
 
     @Override
     public void removePancake(Pancake pancake) {
-        if (order.getPancakeItems().containsKey(pancake)) {
+        if (canUpdatePancakesStates.contains(order.getStatus()) && order.getPancakeItems().containsKey(pancake)) {
             order.removePancake(pancake);
             logAddRemovePancake(order, pancake, "Removed");
         }
