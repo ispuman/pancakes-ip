@@ -18,3 +18,7 @@ After going through the task README again, the following updates have been imple
     or delivered (see 09). This can be improved upon with a maximum of 4 orders per disciple, for example
     (ConcurrentHashMap<Disciple, ArrayList<Order>> discipleOrders), with adding of additional business logic 
     for distinguishing between different disciple's orders and storing them in ArrayList for chronological order.
+12. Concurrency test for Order DO and Disciple client (it's exactly the same test, just different implementation) - 
+    using CyclicBarrier, when all 10 orders are created (virtual threads) then simultaneously for every order
+    are added (and removed) pancakes. When all the operations have finished (CountDownLatch), it is checked for
+    every order (disciple) that it has the correct number of pancakes.

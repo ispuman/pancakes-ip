@@ -61,6 +61,10 @@ public final class Disciple implements PancakeShopCustomer {
         pancake.toDO().removeIngredient(ingredient);
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
