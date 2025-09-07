@@ -12,6 +12,9 @@ import org.pancakelab.service.CreateOrderService;
 
 import java.util.EnumSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +28,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
             OrderStatus.ADDING_PANECAKES, OrderStatus.REMOVING_PANECAKES);
 
     private Order order;
+    private final Lock lock = new ReentrantLock();
 
     public CreateOrderServiceImpl(PancakeOrderRepository pancakeOrderRepository, OrderMapper orderMapper) {
         this.pancakeOrderRepository = pancakeOrderRepository;
@@ -33,12 +37,14 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
     @Override
     public Order createOrder(int building, int room, PancakeShopCustomer customer) {
+        lock.lock();
         if (customer instanceof Disciple disciple) {
             Order previousOrder = pancakeOrderRepository.getDiscipleOrder(disciple);
             if (previousOrder == null) {
                 order = new Order(building, room, customer, orderMapper);
                 pancakeOrderRepository.savePendingPancakeOrder(order, disciple);
                 logCreateOrder(order);
+                lock.unlock();
                 return order;
             } else {
                 throw newPancakeOrderCannotBeCreatedYet(previousOrder.getId());
