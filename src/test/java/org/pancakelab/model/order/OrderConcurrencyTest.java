@@ -10,7 +10,8 @@ import org.pancakelab.model.client.Disciple;
 import org.pancakelab.model.pancake.Pancake;
 import org.pancakelab.model.user.PancakeShopCustomer;
 
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -103,11 +104,10 @@ public class OrderConcurrencyTest {
 
     private PancakeShopCustomer getCustomer(Order order) {
         try {
-            Field customer = Order.class.getDeclaredField("customer");
-            customer.setAccessible(true);
-            PancakeShopCustomer result = (PancakeShopCustomer) customer.get(order);
-            customer.setAccessible(false);
-            return result;
+            Class<?> clazz = order.getClass();
+            VarHandle handle = MethodHandles.privateLookupIn(clazz, MethodHandles.lookup()).findVarHandle(
+                    clazz, "customer", PancakeShopCustomer.class);
+            return (PancakeShopCustomer) handle.get(order);
         } catch (NoSuchFieldException | IllegalAccessException ex) {
             logger.log(Level.SEVERE, ex.getMessage(), ex);
         }
