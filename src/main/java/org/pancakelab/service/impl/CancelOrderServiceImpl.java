@@ -32,6 +32,7 @@ public class CancelOrderServiceImpl implements CancelOrderService {
 
             if (isActionAuthorized(orderId, customer)) {
                 pancakeOrderRepository.removePendingPancakeOrder(disciple);
+                pancakeOrderRepository.removeCustomerOrder(disciple);
                 order.setOrderStatus(OrderStatus.CANCELLED);
                 logCancelOrder(order);
                 return true;

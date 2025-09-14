@@ -31,6 +31,7 @@ public class DeliverOrderServiceImpl implements DeliverOrderService {
                 order.setOrderStatus(OrderStatus.SEND_FOR_DELIVERY);
                 var pancakes = order.getPancakeItems();
                 logDeliverOrder(order, pancakes);
+                pancakeOrderRepository.removeCustomerOrder(disciple);
                 return pancakes;
             }
             String errorMessage = "Order for %s not found and cannot be delivered.".formatted(disciple.toString());
