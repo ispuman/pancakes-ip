@@ -11,7 +11,6 @@ import org.pancakelab.repository.PancakeOrderRepository;
 import org.pancakelab.service.CreateOrderService;
 
 import java.util.EnumSet;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -37,20 +36,26 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
     @Override
     public Order createOrder(int building, int room, PancakeShopCustomer customer) {
-        lock.lock();
-        if (customer instanceof Disciple disciple) {
-            Order previousOrder = pancakeOrderRepository.getDiscipleOrder(disciple);
-            if (previousOrder == null) {
-                order = new Order(building, room, customer, orderMapper);
-                pancakeOrderRepository.savePendingPancakeOrder(order, disciple);
-                logCreateOrder(order);
-                lock.unlock();
-                return order;
-            } else {
-                throw newPancakeOrderCannotBeCreatedYet(previousOrder.getId());
+        try {
+            if (lock.tryLock(10, TimeUnit.SECONDS)) {
+                if (customer instanceof Disciple disciple) {
+                    if (!newPancakeOrderCannotBeCreatedYet(disciple)) {
+                        order = new Order(building, room, customer, orderMapper);
+                        pancakeOrderRepository.savePendingPancakeOrder(order, disciple);
+                        logCreateOrder(order);
+                        return order;
+                    }
+                } else {
+                    throw new IllegalArgumentException("Customer type not supported.");
+                }
             }
-        } else {
-            throw new IllegalArgumentException("Customer type not supported.");
+            return null;
+        } catch (InterruptedException ex) {
+            logger.log(Level.SEVERE, "Thread interrupted while waiting for lock.");
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ex.getMessage(), ex.getCause());
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -77,11 +82,15 @@ public class CreateOrderServiceImpl implements CreateOrderService {
                 .formatted(order.getId(), address.buildingNumber(), address.roomNumber()));
     }
 
-    private NewPancakeOrderCannotBeCreatedYet newPancakeOrderCannotBeCreatedYet(UUID orderId) {
-        String errorMessage =
-                "New pancake order cannot be created until existing one %s is cancelled or delivered.".formatted(orderId);
+    private boolean newPancakeOrderCannotBeCreatedYet(Disciple disciple) {
+        Order previousOrder = pancakeOrderRepository.getDiscipleOrder(disciple);
+        if (previousOrder == null) {
+            return false;
+        }
+        String errorMessage = "New pancake order cannot be created until existing one %s is cancelled or delivered."
+                .formatted(previousOrder.getId());
         logger.log(Level.SEVERE, errorMessage);
-        return new NewPancakeOrderCannotBeCreatedYet(errorMessage);
+        throw new NewPancakeOrderCannotBeCreatedYet(errorMessage);
     }
 
     private void logAddRemovePancake(Order order, Pancake pancake, String action) {
