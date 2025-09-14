@@ -32,19 +32,18 @@ public class OrderConcurrencyTest {
             throws InterruptedException, ExecutionException {
         // setup
         int numberOfDisciples = 10;
-        CountDownLatch latch = new CountDownLatch(numberOfDisciples);
         CyclicBarrier barrier = new CyclicBarrier(numberOfDisciples,null);
 
-        List<Future<Order>> orders = new ArrayList<>(numberOfDisciples);
         // exercise
+        List<Future<Order>> orders;
         try (ExecutorService vte = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<Callable<Order>> tasks = new ArrayList<>(numberOfDisciples);
             for (int i = 1; i <= numberOfDisciples; i++) {
-                Future<Order> order = vte.submit(new DiscipleCreatesAnOrderAndAddsPancakesTask(barrier, latch, i));
-                orders.add(order);
+                tasks.add(new DiscipleCreatesAnOrderAndAddsPancakesTask(barrier, i));
             }
+            orders = vte.invokeAll(tasks, 10, TimeUnit.SECONDS);
         }
         // verify
-        latch.await();
         for (Future<Order> order : orders) {
             PancakeShopCustomer customer = getCustomer(order.get());
             if (customer instanceof Disciple disciple) {
@@ -57,8 +56,8 @@ public class OrderConcurrencyTest {
         // tear down
     }
 
-    private record DiscipleCreatesAnOrderAndAddsPancakesTask(CyclicBarrier barrier, CountDownLatch latch,
-                                                             int counter) implements Callable<Order> {
+    private record DiscipleCreatesAnOrderAndAddsPancakesTask(CyclicBarrier barrier, int counter)
+            implements Callable<Order> {
         @Override
         public Order call() {
             try {
@@ -83,7 +82,6 @@ public class OrderConcurrencyTest {
                 }
                 logger.log(Level.INFO, disciple + " created order and added pancake.");
 
-                latch.countDown();
                 return order;
             } catch (InterruptedException | BrokenBarrierException ex) {
                 logger.log(Level.SEVERE, ex.getMessage(), ex);
