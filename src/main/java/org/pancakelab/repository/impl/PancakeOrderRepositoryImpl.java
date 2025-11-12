@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class PancakeOrderRepositoryImpl implements PancakeOrderRepository {
 
@@ -18,7 +19,13 @@ public final class PancakeOrderRepositoryImpl implements PancakeOrderRepository 
     private final Map<UUID, Order> preparedPancakeOrders = new ConcurrentHashMap<>();
     private final Map<Disciple, Order> discipleOrders = new ConcurrentHashMap<>();
 
-    private PancakeOrderRepositoryImpl() {}
+    private static final AtomicBoolean instanceCreated = new AtomicBoolean(false);
+
+    private PancakeOrderRepositoryImpl() {
+        if (instanceCreated.getAndSet(true)) {
+            throw new IllegalStateException("The singleton repository is already instantiated.");
+        }
+    }
 
     private static class BillPughSingletonHelper {
         private static final PancakeOrderRepositoryImpl INSTANCE = new PancakeOrderRepositoryImpl();

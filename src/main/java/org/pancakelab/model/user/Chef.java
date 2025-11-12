@@ -4,6 +4,7 @@ import org.pancakelab.factory.OrderServiceFactoryImpl;
 import org.pancakelab.service.PancakeServiceFacade;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class Chef implements PancakeShopProducer {
 
@@ -11,7 +12,12 @@ public final class Chef implements PancakeShopProducer {
     private final static PancakeServiceFacade pancakeFacadeService =
             new OrderServiceFactoryImpl().createPancakeServiceFacade();
 
+    private static final AtomicBoolean instanceCreated = new AtomicBoolean(false);
+
     private Chef() {
+        if (instanceCreated.getAndSet(true)) {
+            throw new IllegalStateException("The singleton Chef is already instantiated.");
+        }
         this.id = UUID.randomUUID();
     }
 
